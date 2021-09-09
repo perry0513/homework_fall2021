@@ -38,8 +38,6 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         self.training = training
         self.nn_baseline = nn_baseline
 
-        # print(f'\nMLPPolicy info:\n ob_dim = {ob_dim}\n ac_dim = {ac_dim}\n n_layers = {n_layers}\n size = {size}\n')
-
         if self.discrete:
             self.logits_na = ptu.build_mlp(
                 input_size=self.ob_dim,
@@ -93,7 +91,6 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
         return ptu.to_numpy(ac)
         # raise NotImplementedError
-        # return ptu.to_numpy(self(observation))
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -105,20 +102,14 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
     def forward(self, observation: torch.FloatTensor) -> Any:
-        # if self.discrete:
-        #     ac = self.logits_na(observation)
-        # else:
-        #     mean, std = self.mean_net(observation), torch.exp(self.logstd)
-        #     ac = torch.distributions.Normal(mean, std).rsample()
-
         if self.discrete:
             ret = self.logits_na(observation)
         else:
             mean, std = self.mean_net(observation), torch.exp(self.logstd)
             ret = torch.distributions.Normal(mean, std)
 
-        # raise NotImplementedError
         return ret
+        # raise NotImplementedError
 
 
 #####################################################
@@ -127,7 +118,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 class MLPPolicySL(MLPPolicy):
     def __init__(self, ac_dim, ob_dim, n_layers, size, **kwargs):
         super().__init__(ac_dim, ob_dim, n_layers, size, **kwargs)
-        self.loss = nn.CrossEntropyLoss()
+        self.loss = nn.MSELoss()
 
     def update(
             self, observations, actions,

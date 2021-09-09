@@ -223,6 +223,7 @@ class RL_Trainer(object):
     ####################################
 
     def perform_logging(self, itr, paths, eval_policy, train_video_paths, training_logs):
+        eval_policy.eval()
 
         # collect eval trajectories, for logging
         print("\nCollecting data for eval...")
@@ -281,3 +282,4 @@ class RL_Trainer(object):
             print('Done logging...\n\n')
 
             self.logger.flush()
+        eval_policy.train()
