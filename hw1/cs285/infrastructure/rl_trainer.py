@@ -9,6 +9,8 @@ from cs285.infrastructure import pytorch_util as ptu
 from cs285.infrastructure.logger import Logger
 from cs285.infrastructure import utils
 
+import pickle as pkl
+
 # how many rollouts to save as videos to tensorboard
 MAX_NVIDEO = 2
 MAX_VIDEO_LEN = 40  # we overwrite this in the code below
@@ -50,6 +52,7 @@ class RL_Trainer(object):
         # Is this env continuous, or self.discrete?
         discrete = isinstance(self.env.action_space, gym.spaces.Discrete)
         self.params['agent_params']['discrete'] = discrete
+        if discrete: print('Action space is DISCRETE')
 
         # Observation and action sizes
         ob_dim = self.env.observation_space.shape[0]
@@ -166,7 +169,15 @@ class RL_Trainer(object):
         # HINT1: use sample_trajectories from utils
         # HINT2: you want each of these collected rollouts to be of length self.params['ep_len']
         print("\nCollecting data to be used for training...")
-        paths, envsteps_this_batch = TODO
+        paths, envsteps_this_batch = [], 0
+
+        # Load expert data if first iteration
+        if itr == 0:
+            with open(load_initial_expertdata, 'rb') as f:
+                expert_data = np.load(f, allow_pickle=True)
+                return expert_data, 0, None
+
+        paths, envsteps_this_batch = utils.sample_trajectories(self.env, collect_policy, batch_size, self.params['ep_len'])
 
         # collect more rollouts with the same policy, to be saved as videos in tensorboard
         # note: here, we collect MAX_NVIDEO rollouts, each of length MAX_VIDEO_LEN
@@ -187,12 +198,12 @@ class RL_Trainer(object):
             # TODO sample some data from the data buffer
             # HINT1: use the agent's sample function
             # HINT2: how much data = self.params['train_batch_size']
-            ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = TODO
+            ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = self.agent.sample(self.params['train_batch_size'])
 
             # TODO use the sampled data to train an agent
             # HINT: use the agent's train function
             # HINT: keep the agent's training log for debugging
-            train_log = TODO
+            train_log = self.agent.train(ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch)
             all_logs.append(train_log)
         return all_logs
 
@@ -203,12 +214,16 @@ class RL_Trainer(object):
         # HINT: query the policy (using the get_action function) with paths[i]["observation"]
         # and replace paths[i]["action"] with these expert labels
 
+        for i in range(len(paths)):
+            paths[i]['action'] = expert_policy.get_action(paths[i]['observation'])
+
         return paths
 
     ####################################
     ####################################
 
     def perform_logging(self, itr, paths, eval_policy, train_video_paths, training_logs):
+        eval_policy.eval()
 
         # collect eval trajectories, for logging
         print("\nCollecting data for eval...")
@@ -267,3 +282,4 @@ class RL_Trainer(object):
             print('Done logging...\n\n')
 
             self.logger.flush()
+        eval_policy.train()
