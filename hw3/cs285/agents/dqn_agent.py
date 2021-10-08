@@ -77,7 +77,7 @@ class DQNAgent(object):
         self.replay_buffer.store_effect(self.replay_buffer_idx, action, reward, done)
 
         # TODO if taking this step resulted in done, reset the env (and the latest observation)
-        if done: self.env.reset()
+        if done: self.last_obs = self.env.reset()
 
     def sample(self, batch_size):
         if self.replay_buffer.can_sample(self.batch_size):
