@@ -134,7 +134,7 @@ class MLPPolicyAC(MLPPolicy):
         # TODO: update the policy and return the loss
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
-        adv_n = ptu.from_nump(adv_n)
+        adv_n = ptu.from_numpy(adv_n)
 
         loss = -torch.sum(self(observations).log_prob(actions) * adv_n)
 
