@@ -1,6 +1,7 @@
 ## Commands
-To plot the results, execute `plot_results.py`.
+To plot the results, execute `plot_results.py` in `run_logs/`.
 ```
+cd run_logs/
 python3 plot_results.py
 ```
 
