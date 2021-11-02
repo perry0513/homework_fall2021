@@ -1,4 +1,8 @@
 ## Commands
+To plot the results, execute `plot_results.py`.
+```
+python3 plot_results.py
+```
 
 ### Experiment 1 
 Train dynamics model on `cheetah` task.
@@ -84,3 +88,4 @@ python cs285/scripts/run_hw4_mb.py --exp_name q5_cheetah_cem_4 --env_name 'cheet
     --mpc_horizon 15 --add_sl_noise --num_agent_train_steps_per_iter 1500 --batch_size_initial 5000 
     --batch_size 5000 --n_iter 5 --mpc_action_sampling_strategy 'cem' --cem_iterations 4
 ```
+
