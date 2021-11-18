@@ -74,6 +74,9 @@ def main():
 
     parser.add_argument('--use_boltzmann', action='store_true')
 
+    parser.add_argument('--use_count', action='store_true')
+    parser.add_argument('--round_digit', type=int, default=int(2))
+
     args = parser.parse_args()
 
     # convert to dictionary
